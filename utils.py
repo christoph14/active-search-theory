@@ -1,6 +1,6 @@
 import networkx as nx
 import numpy as np
-
+import pickle
 
 def check_objective_function(G):
     f = nx.get_node_attributes(G, 'objective')
@@ -14,6 +14,12 @@ def check_objective_function(G):
             if not values == sorted(values, reverse=True):
                 # print(f"Path {path} with values {values} is not strictly decreasing.")
                 return False
+            if len(values)!=len(set(values)):
+                print("some path has non unique node labels")
+                return False
+    if len(set(f[v] for v in G.nodes))<G.number_of_nodes():
+        print("Node labels are not unique")
+        return False
     return True
 
 
@@ -66,3 +72,12 @@ def centroid(G, S, distances=None, return_all=False):
     else:
         c = np.argmin(np.sum(distances[S], axis=0))
     return c
+
+def write_graph(G,file):
+    with open(f"data/{file}.pickle","wb") as f:
+        pickle.dump(G,f)
+def read_graph(file):
+    with open(f"data/{file}.pickle","rb") as f:
+        G=pickle.load(f)
+    assert check_objective_function(G), "Error: Objective function is not convex."
+    return G
