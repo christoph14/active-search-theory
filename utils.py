@@ -15,13 +15,26 @@ def check_objective_function(G):
                 # print(f"Path {path} with values {values} is not strictly decreasing.")
                 return False
             if len(values)!=len(set(values)):
-                print("some path has non unique node labels")
+                print("some path has non unique node labels:", path)
                 return False
     if len(set(f[v] for v in G.nodes))<G.number_of_nodes():
         print("Node labels are not unique")
         return False
     return True
 
+def create_objective(G,target_node=None):
+    n=G.number_of_nodes()
+    if target_node==None:
+        target_node = np.random.randint(0,n)
+    print(f"Selected target node {target_node}")
+    offset = [0 for _ in range(n)]
+    f = dict()
+    for node in G.nodes:
+        dist = nx.shortest_path_length(G, target_node, node)
+        f[node] = dist*n + offset[dist]
+        offset[dist]+=1
+    nx.set_node_attributes(G, f, 'objective')
+    return G
 
 def create_objective_function_random(G, seed=None, max_iter=10000):
     if seed is None:
@@ -63,21 +76,20 @@ def create_objective_function_star(G: nx.Graph, seed: object = None) -> dict:
         d += 1
     return f
 
-
-def centroid(G, S, distances=None, return_all=False):
-    if distances is None:
-        distances = nx.floyd_warshall_numpy(G)
-    if return_all:
-        c = np.where(np.sum(distances[S], axis=0) == np.sum(distances[S], axis=0).min())[0]
-    else:
-        c = np.argmin(np.sum(distances[S], axis=0))
-    return c
-
 def write_graph(G,file):
-    with open(f"data/{file}.pickle","wb") as f:
+    with open(file,"wb") as f:
         pickle.dump(G,f)
 def read_graph(file):
-    with open(f"data/{file}.pickle","rb") as f:
-        G=pickle.load(f)
+    if file.endswith(".pickle"):
+        with open(file,"rb") as f:
+            G=pickle.load(f)
+    elif file.endswith(".s6"):
+        with open(file,"rb") as f:
+            G=nx.sparse6.from_sparse6_bytes(f.read())
+    else:
+        raise Exception("Non supported file format")
+    if 'objective' not in G[0]:
+        print("No node labels. Creating node labels")
+        G=create_objective(G)
     assert check_objective_function(G), "Error: Objective function is not convex."
     return G

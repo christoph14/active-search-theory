@@ -1,0 +1,1 @@
+for ((i = 0 ; i < 65 ; i++ )); do python run.py data/girth5 -t "$i"; done >> all.log

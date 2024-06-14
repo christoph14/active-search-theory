@@ -1,15 +1,19 @@
 import networkx as nx
+import numpy as np
 
-from utils import check_objective_function, write_graph
+from utils import check_objective_function, create_objective, write_graph
+from visualization import plot_iteration
 
 #Specify name
-graph_name="Path32"
+graph_name="data/Petersen.pickle"
+G=nx.petersen_graph()
 
-G = nx.path_graph(32)
-f = {i: i for i in G.nodes}
+G=create_objective(G)
 
-nx.set_node_attributes(G, f, 'objective')
+print(f"Objective is {"" if check_objective_function(G) else "not"} convex.")
 
+node_positions=nx.spring_layout(G)
+plot_iteration(G,G.nodes, node_positions, target_node=0)
 
 
 assert check_objective_function(G), "Error: Objective function is not convex."
