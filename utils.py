@@ -25,7 +25,7 @@ def check_objective_function(G):
 def create_objective(G,target_node=None):
     n=G.number_of_nodes()
     if target_node==None:
-        target_node = np.random.randint(0,n)
+        target_node = list(G.nodes())[np.random.randint(0,n)]
     print(f"Selected target node {target_node}")
     offset = [0 for _ in range(n)]
     f = dict()
@@ -92,4 +92,5 @@ def read_graph(file):
         print("No node labels. Creating node labels")
         G=create_objective(G)
     assert check_objective_function(G), "Error: Objective function is not convex."
+    assert list(G.nodes())==list(range(G.number_of_nodes())), "Error: We need node names to match ids"
     return G
