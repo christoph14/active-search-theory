@@ -1,6 +1,8 @@
 import networkx as nx
 import numpy as np
+import os
 import pickle
+import logging
 
 def check_objective_function(G):
     f = nx.get_node_attributes(G, 'objective')
@@ -24,9 +26,9 @@ def check_objective_function(G):
 
 def create_objective(G,target_node=None):
     n=G.number_of_nodes()
-    if target_node==None:
+    if target_node==None or target_node not in range(n):
         target_node = list(G.nodes())[np.random.randint(0,n)]
-    print(f"Selected target node {target_node}")
+    logging.info(f"Selected target node {target_node}")
     offset = [0 for _ in range(n)]
     f = dict()
     for node in G.nodes:
@@ -79,18 +81,52 @@ def create_objective_function_star(G: nx.Graph, seed: object = None) -> dict:
 def write_graph(G,file):
     with open(file,"wb") as f:
         pickle.dump(G,f)
-def read_graph(file):
-    if file.endswith(".pickle"):
-        with open(file,"rb") as f:
+def read_graph(instance):
+    name,string,format = instance
+    if format=="pickle-file":
+        with open(string,"rb") as f:
             G=pickle.load(f)
-    elif file.endswith(".s6"):
-        with open(file,"rb") as f:
-            G=nx.sparse6.from_sparse6_bytes(f.read())
+    elif format=="s6-file":
+        with open(string,"rb") as f:
+            G=nx.from_sparse6_bytes(f.readline())
+    elif format=="s6-bytes":
+        G=nx.from_sparse6_bytes(string)
+    elif format=="g6-bytes":
+        G=nx.from_graph6_bytes(string)
     else:
         raise Exception("Non supported file format")
-    if 'objective' not in G[0]:
-        print("No node labels. Creating node labels")
-        G=create_objective(G)
-    assert check_objective_function(G), "Error: Objective function is not convex."
+    if 'objective' in G[0]:
+        assert check_objective_function(G), "Error: Objective function is not convex."
     assert list(G.nodes())==list(range(G.number_of_nodes())), "Error: We need node names to match ids"
     return G
+
+def extract_instances(filepath, linenumber=None):
+    instances=[]
+    if filepath.endswith(".pickle"):
+        instances.append([filepath,filepath,"pickle-file"])
+    if filepath.endswith(".s6"):
+        with open(filepath,"rb") as f:
+            for i,line in enumerate(f.readlines()):
+                instances.append([f"{filepath}:{i}",line[:-1],"s6-bytes"])
+    if filepath.endswith(".g6"):
+        with open(filepath,"rb") as f:
+            for i,line in enumerate(f.readlines()):
+                instances.append([f"{filepath}:{i}",line[:-1],"g6-bytes"])
+    if linenumber != None:
+        return [instances[int(linenumber)]]
+    return instances
+
+
+def collect_instances(path):
+    instances = []
+    if os.path.isdir(path):
+        directory = os.fsencode(path)    
+        for file in sorted(os.listdir(directory)):
+            filename = os.fsdecode(file)            
+            filepath = os.path.join(path, filename)
+            instances += extract_instances(filepath)
+        return instances
+    if ":" in path:
+        path,linenumber=path.split(":")
+        return extract_instances(path,linenumber)
+    return extract_instances(path)
