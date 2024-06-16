@@ -1,1 +1,1 @@
-for ((i = 0 ; i < 36 ; i++ )); do python run.py data/4_edge_critical_snarks.36.g6 -t "$i"; done 2> all.log
+for ((i = 0 ; i < 50 ; i++ )); do python run.py data/Hoffman_singleton.pickle -t "$i"; done 2> all.log

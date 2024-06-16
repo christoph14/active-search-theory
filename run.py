@@ -25,13 +25,10 @@ instances = collect_instances(args.path)
 
 # %%
 for instance in instances:
-    logging.info(f"\nInstance: {instance[0]}")
     G=read_graph(instance)
     if args.target in range(G.number_of_nodes()) or 'objective' not in G[0]:
         G=create_objective(G,args.target)
 
-    logging.info(f"n={G.number_of_nodes()}")
-    logging.info(f"m={G.number_of_edges()}")
     #nx.draw(G)
     #plt.show()
 
@@ -39,6 +36,8 @@ for instance in instances:
     node_labels = nx.get_node_attributes(G, 'objective')
     target_node = min(node_labels,key=node_labels.get)
 
+    logging.info(f"\nInstance: {instance[0]} with target {target_node}")
+    logging.info(f"n={G.number_of_nodes()}, m={G.number_of_edges()}")
 
     #Specify algorithm
 
@@ -54,7 +53,8 @@ for instance in instances:
 
     #if len(total_queries)/G.number_of_nodes() > 0.5 or len(no_halving)>5:
     if len(no_halving)>0:
-        logging.warning(f"\nInstance: {instance[0]}")
+        logging.warning(f"\nInstance: {instance[0]} with target {target_node}")
+        logging.warning(f"n={G.number_of_nodes()}, m={G.number_of_edges()}")
         logging.warning(f"Binary Search took {len(stats)-1} iterations. Number of nodes queried: {len(total_queries):>2}/{G.number_of_nodes()}  ({100*len(total_queries)/G.number_of_nodes():>3.0f}%)")
         logging.warning(f"No halving in these {len(no_halving)} iterations: {no_halving}")
 

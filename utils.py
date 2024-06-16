@@ -28,7 +28,7 @@ def create_objective(G,target_node=None):
     n=G.number_of_nodes()
     if target_node==None or target_node not in range(n):
         target_node = list(G.nodes())[np.random.randint(0,n)]
-    logging.info(f"Selected target node {target_node}")
+    logging.debug(f"Selected target node {target_node}")
     offset = [0 for _ in range(n)]
     f = dict()
     for node in G.nodes:
@@ -37,46 +37,6 @@ def create_objective(G,target_node=None):
         offset[dist]+=1
     nx.set_node_attributes(G, f, 'objective')
     return G
-
-def create_objective_function_random(G, seed=None, max_iter=10000):
-    if seed is None:
-        rng = np.random.default_rng()
-    elif isinstance(seed, int):
-        rng = np.random.default_rng(seed)
-    elif isinstance(seed, np.random.Generator):
-        rng = seed
-    else:
-        raise TypeError("seed is not correct.")
-
-    iterations = 0
-    while iterations < max_iter:
-        iterations += 1
-        f = {node: value for (node, value) in zip(G.nodes, rng.random(nx.number_of_nodes(G)))}
-        nx.set_node_attributes(G, f, 'objective')
-        if check_objective_function(G):
-            break
-    raise ValueError(f"Could not create a valid objective function in {max_iter} iterations!")
-
-
-def create_objective_function_star(G: nx.Graph, seed: object = None) -> dict:
-    if seed is None:
-        rng = np.random.default_rng()
-    elif isinstance(seed, int):
-        rng = np.random.default_rng(seed)
-    elif isinstance(seed, np.random.Generator):
-        rng = seed
-    else:
-        raise TypeError("seed is not correct.")
-    target = rng.choice(list(G.nodes))
-    f = {node: np.nan for node in G.nodes}
-    distances = nx.shortest_path_length(G, source=target)
-    d = 0
-    while np.isnan(list(f.values())).any():
-        selected_nodes = np.where(np.array(list(distances.values())) == d)[0]
-        for node in np.array(list(distances.keys()))[selected_nodes]:
-            f[node] = rng.random() + d
-        d += 1
-    return f
 
 def write_graph(G,file):
     with open(file,"wb") as f:

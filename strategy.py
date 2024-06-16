@@ -39,8 +39,7 @@ def binary_search(G, distances, pivot="centroid", deletion_effort="incident_edge
         c = centroids[np.argmax([f[v] if v not in queries else -f[v] for v in centroids])] 
         #c = centroids[np.argmax([f[v] for v in centroids])] 
         logging.info(f"Centroid of size {len(centroids)}. Choosing node {c}. {"Label of c is already known." if c in queries else ""} {"Target in Centroid." if target_node in centroids else ""}")
-        if len(centroids)<5:
-            logging.info(centroids)
+        logging.debug(f"Centroid: {centroids}")
         old_len_S = len(S)
 
         queries[c] = f[c]
