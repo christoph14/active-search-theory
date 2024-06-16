@@ -1,1 +1,1 @@
-for ((i = 0 ; i < 50 ; i++ )); do python run.py data/Hoffman_singleton.pickle -t "$i"; done 2> all.log
+for ((i = 0 ; i < 80 ; i++ )); do python run.py data/Generalized_Petersen/Generalized_Petersen_5.pickle -t "$i"; done 2> all.log
