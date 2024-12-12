@@ -13,8 +13,8 @@ def rule_out_nodes_based_on_edge(G,S,distances,e,queries):
 
     return S_minus
 
-# Iteratively select a node and query its and its neighbors values.
-# Then disregard nodes which cant be target.
+# Iteratively select a node and query it and its neighbor's values.
+# Then disregard nodes which cant be the target.
 # Specify what information is used to determine non-target nodes (deletion_effort):
 #  - incident edges:    Consider all edges incident to the center/selected node
 #  - triangles:         + Consider edges forming triangles between neighbors of c
@@ -38,7 +38,7 @@ def binary_search(G, distances, pivot="centroid", deletion_effort="incident_edge
         centroids = centroid(G, S, distances,return_all=True)
         c = centroids[np.argmax([f[v] if v not in queries else -f[v] for v in centroids])] 
         #c = centroids[np.argmax([f[v] for v in centroids])] 
-        logging.info(f"Centroid of size {len(centroids)}. Choosing node {c}. {"Label of c is already known." if c in queries else ""} {"Target in Centroid." if target_node in centroids else ""}")
+        logging.info(f"Centroid of size {len(centroids)}. Choosing node {c}. {'Label of c is already known.' if c in queries else ''} {'Target in Centroid.' if target_node in centroids else ''}")
         logging.debug(f"Centroid: {centroids}")
         old_len_S = len(S)
 
